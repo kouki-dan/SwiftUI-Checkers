@@ -133,6 +133,40 @@ struct Checker {
         }
         return nil
     }
+
+    mutating func tapped(square: Square) {
+        let beforeSelectingSquare = searchSelectingSquare()
+
+        board[square.y].row[square.x].selecting = true
+
+        if let beforeSelectingSquare = beforeSelectingSquare {
+            board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].selecting = false
+            let beforeSquare = board[beforeSelectingSquare.y].row[beforeSelectingSquare.x]
+            let currentSquare = board[square.y].row[square.x]
+
+            // TODO Confirm saure is black (Checkers piece must move on black)
+
+            if beforeSquare.id == currentSquare.id {
+                // If before position and current position is same, change piece type
+                board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].advancePiece()
+            } else if currentSquare.piece == nil && beforeSquare.piece != nil {
+                // Move piece to (square.x, square.y)
+                // If piece is already placed at this position, do nothing.
+                board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].piece = nil
+                board[square.y].row[square.x].piece = beforeSquare.piece
+            }
+
+            // TODO: Prohivit the move without Checkers rule
+            // - must move diagonally forward before promoting
+            // - after promoting, can move backward
+            // - and the other! (Many rules exist)
+            // TODO: Auto-Promote and Auto-Removal any pieces on rule of Checkers
+        }
+    }
+
+    mutating func longPressed(square: Square) {
+        board[square.y].row[square.x].piece = nil
+    }
 }
 
 
@@ -146,36 +180,10 @@ struct ContentView : View {
                     ForEach(row.row) { square in
                         square.view
                             .tapAction {
-                                let beforeSelectingSquare = self.checker.searchSelectingSquare()
-
-                                self.checker.board[square.y].row[square.x].selecting = true
-
-                                if let beforeSelectingSquare = beforeSelectingSquare {
-                                    self.checker.board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].selecting = false
-                                    let beforeSquare = self.checker.board[beforeSelectingSquare.y].row[beforeSelectingSquare.x]
-                                    let currentSquare = self.checker.board[square.y].row[square.x]
-
-                                    // TODO Confirm saure is black (Checkers piece must move on black)
-
-                                    if beforeSquare.id == currentSquare.id {
-                                        // If before position and current position is same, change piece type
-                                        self.checker.board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].advancePiece()
-                                    } else if currentSquare.piece == nil && beforeSquare.piece != nil {
-                                        // Move piece to (square.x, square.y)
-                                        // If piece is already placed at this position, do nothing.
-                                        self.checker.board[beforeSelectingSquare.y].row[beforeSelectingSquare.x].piece = nil
-                                        self.checker.board[square.y].row[square.x].piece = beforeSquare.piece
-                                    }
-
-                                    // TODO: Prohivit the move without Checkers rule
-                                    // - must move diagonally forward before promoting
-                                    // - after promoting, can move backward
-                                    // - and the other! (Many rules exist)
-                                    // TODO: Auto-Promote and Auto-Removal any pieces on rule of Checkers
-                                }
+                                self.checker.tapped(square: square)
                             }
                             .longPressAction({
-                                self.checker.board[square.y].row[square.x].piece = nil
+                                self.checker.longPressed(square: square)
                             })
                     }
                 }
