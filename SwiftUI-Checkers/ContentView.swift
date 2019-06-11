@@ -174,6 +174,9 @@ struct ContentView : View {
                                     // TODO: Auto-Promote and Auto-Removal any pieces on rule of Checkers
                                 }
                             }
+                            .longPressAction({
+                                self.checker.board[square.y].row[square.x].piece = nil
+                            })
                     }
                 }
             }
