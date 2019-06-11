@@ -37,60 +37,6 @@ struct Square: Identifiable {
             self.piece = Piece(rawValue: piece.rawValue + 1)
         }
     }
-
-    var view: some View {
-        let backgroundColor: Color
-        let pieceColor: Color?
-        let isPromoted: Bool
-        let squareBorder: Color
-
-        switch background {
-        case .black:
-            backgroundColor = .black
-        case .white:
-            backgroundColor = .gray
-        }
-
-        if let piece = piece {
-            switch piece {
-            case .black:
-                pieceColor = .blue
-                isPromoted = false
-            case .queenBlack:
-                pieceColor = .blue
-                isPromoted = true
-            case .red:
-                pieceColor = .red
-                isPromoted = false
-            case .queenRed:
-                pieceColor = .red
-                isPromoted = true
-            }
-        } else {
-            pieceColor = nil
-            isPromoted = false
-        }
-
-        if selecting {
-            squareBorder = .yellow
-        } else {
-            squareBorder = .clear
-        }
-
-
-        return ZStack {
-            Rectangle()
-                .foregroundColor(backgroundColor)
-                .overlay(Rectangle().stroke(squareBorder, lineWidth: 2))
-            if pieceColor != nil {
-                Circle()
-                    .foregroundColor(pieceColor!)
-                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                    .overlay(Circle().stroke(isPromoted ? Color.white : Color.clear, lineWidth: 2).padding(6))
-                    .padding(4)
-            }
-        }
-    }
 }
 
 struct Row: Identifiable {
@@ -169,6 +115,67 @@ struct Checker {
     }
 }
 
+struct SquareView: View {
+    let square: Square
+
+    init(square: Square) {
+        self.square = square
+    }
+
+    var body: some View {
+        let backgroundColor: Color
+        let pieceColor: Color?
+        let isPromoted: Bool
+        let squareBorder: Color
+
+        switch square.background {
+        case .black:
+            backgroundColor = .black
+        case .white:
+            backgroundColor = .gray
+        }
+
+        if let piece = square.piece {
+            switch piece {
+            case .black:
+                pieceColor = .blue
+                isPromoted = false
+            case .queenBlack:
+                pieceColor = .blue
+                isPromoted = true
+            case .red:
+                pieceColor = .red
+                isPromoted = false
+            case .queenRed:
+                pieceColor = .red
+                isPromoted = true
+            }
+        } else {
+            pieceColor = nil
+            isPromoted = false
+        }
+
+        if square.selecting {
+            squareBorder = .yellow
+        } else {
+            squareBorder = .clear
+        }
+
+
+        return ZStack {
+            Rectangle()
+                .foregroundColor(backgroundColor)
+                .overlay(Rectangle().stroke(squareBorder, lineWidth: 2))
+            if pieceColor != nil {
+                Circle()
+                    .foregroundColor(pieceColor!)
+                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                    .overlay(Circle().stroke(isPromoted ? Color.white : Color.clear, lineWidth: 2).padding(6))
+                    .padding(4)
+            }
+        }
+    }
+}
 
 struct ContentView : View {
     @State var checker = Checker()
@@ -178,7 +185,7 @@ struct ContentView : View {
             ForEach(self.checker.board) { row in
                 HStack(spacing: 0) {
                     ForEach(row.row) { square in
-                        square.view
+                        SquareView(square: square)
                             .tapAction {
                                 self.checker.tapped(square: square)
                             }
